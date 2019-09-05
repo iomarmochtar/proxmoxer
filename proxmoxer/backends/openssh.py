@@ -21,7 +21,9 @@ class ProxmoxOpenSSHSession(ProxmoxBaseSSHSession):
                  timeout=5,
                  forward_ssh_agent=False,
                  sudo=False,
-                 identity_file=None):
+                 identity_file=None,
+                 platform='pve'):
+        super(ProxmoxOpenSSHSession, self).__init__(platform=platform)
         self.host = host
         self.username = username
         self.configfile = configfile
@@ -47,11 +49,15 @@ class ProxmoxOpenSSHSession(ProxmoxBaseSSHSession):
 
 
 class Backend(BaseBackend):
-    def __init__(self, host, user, configfile=None, port=22, timeout=5, forward_ssh_agent=False, sudo=False, identity_file=None):
+    def __init__(self, host, user, configfile=None, 
+            port=22, timeout=5, forward_ssh_agent=False, 
+            sudo=False, identity_file=None, platform='pve'):
+
         self.session = ProxmoxOpenSSHSession(host, user,
                                              configfile=configfile,
                                              port=port,
                                              timeout=timeout,
                                              forward_ssh_agent=forward_ssh_agent,
                                              sudo=sudo,
-                                             identity_file=identity_file)
+                                             identity_file=identity_file,
+                                             platform=platform)

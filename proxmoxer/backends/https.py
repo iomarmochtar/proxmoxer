@@ -45,7 +45,7 @@ class ProxmoxHTTPAuth(AuthBase):
         if response_data is None:
             raise AuthenticationError("Couldn't authenticate user: {0} to {1}".format(username, base_url + "/access/ticket"))
 
-        self.pve_auth_cookie = response_data["ticket"]
+        self.auth_cookie = response_data["ticket"]
         self.csrf_prevention_token = response_data["CSRFPreventionToken"]
 
     def __call__(self, r):
@@ -60,7 +60,7 @@ class ProxmoxHTTPTokenAuth(ProxmoxHTTPAuth):
     may be used instead of passing username/password.
     """
     def __init__(self, auth_token, csrf_token):
-        self.pve_auth_cookie = auth_token
+        self.auth_cookie = auth_token
         self.csrf_prevention_token = csrf_token
 
 
@@ -112,7 +112,10 @@ class ProxmoxHttpSession(requests.Session):
 
 class Backend(object):
     def __init__(self, host, user, password, port=8006, verify_ssl=True,
-                 mode='json', timeout=5, auth_token=None, csrf_token=None):
+                 mode='json', timeout=5, auth_token=None, csrf_token=None,
+                 platform='pve' 
+                 ):
+        self.platform = platform
         if ':' in host:
             host, host_port = host.split(':')
             port = host_port if host_port.isdigit() else port
@@ -131,7 +134,8 @@ class Backend(object):
         session = ProxmoxHttpSession()
         session.verify = self.verify_ssl
         session.auth = self.auth
-        session.cookies = cookiejar_from_dict({"PVEAuthCookie": self.auth.pve_auth_cookie})
+        cookie_name = '{}AuthCookie'.format(self.platform.upper())
+        session.cookies = cookiejar_from_dict({cookie_name: self.auth.auth_cookie})
         session.headers['Connection'] = 'keep-alive'
         session.headers["accept"] = self.get_serializer().get_accept_types()
         return session
@@ -145,4 +149,4 @@ class Backend(object):
 
     def get_tokens(self):
         """Return the in-use auth and csrf tokens."""
-        return self.auth.pve_auth_cookie, self.auth.csrf_prevention_token
+        return self.auth.auth_cookie, self.auth.csrf_prevention_token

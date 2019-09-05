@@ -121,3 +121,9 @@ class ProxmoxAPI(ProxmoxResourceBase):
             return None, None
 
         return self._backend.get_tokens()
+
+class ProxmoxMGAPI(ProxmoxAPI):
+
+    def __init__(self, host, *args, **kwargs):
+        kwargs['platform'] = 'pmg'
+        super(ProxmoxMGAPI, self).__init__(host, *args, **kwargs)

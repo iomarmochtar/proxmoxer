@@ -21,7 +21,10 @@ class ProxmoxParamikoSession(ProxmoxBaseSSHSession):
                  private_key_file=None,
                  port=22,
                  timeout=5,
-                 sudo=False):
+                 sudo=False,
+                 platform='pve'):
+        
+        super(ProxmoxParamikoSession, self).__init__(platform=platform)
         self.host = host
         self.username = username
         self.password = password
@@ -67,12 +70,16 @@ class ProxmoxParamikoSession(ProxmoxBaseSSHSession):
 
 
 class Backend(BaseBackend):
-    def __init__(self, host, user, password=None, private_key_file=None, port=22, timeout=5, sudo=False):
+    def __init__(self, host, user, password=None, 
+            private_key_file=None, port=22, timeout=5, 
+            sudo=False, platform='pve'):
+
         self.session = ProxmoxParamikoSession(host, user,
                                               password=password,
                                               private_key_file=private_key_file,
                                               port=port,
                                               timeout=timeout,
-                                              sudo=sudo)
+                                              sudo=sudo,
+                                              platform=platform)
 
 
